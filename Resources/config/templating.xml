@@ -9,9 +9,9 @@
     </parameters>
 
     <services>
-        <service id="templating.helper.menu" class="%templating.helper.menu.class%">
+        <service id="templating.helper.menu" class="%templating.helper.menu.class%" public="false">
             <tag name="templating.helper" alias="menu" />
-            <argument type="service" id="menu.provider" />
+            <argument type="service" id="menu.preparator" />
             <argument type="service" id="templating" />
         </service>
     </services>

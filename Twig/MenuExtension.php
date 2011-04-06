@@ -2,21 +2,34 @@
 
 namespace Knplabs\Bundle\MenuBundle\Twig;
 
-use Knplabs\Bundle\MenuBundle\Templating\Helper\MenuHelper;
+use Knplabs\Bundle\MenuBundle\Templating\Preparator\MenuPreparator;
 
 class MenuExtension extends \Twig_Extension
 {
     /**
-     * @var MenuHelper
+     * @var MenuPreparator
      */
-    protected $helper;
+    protected $preparator;
 
     /**
-     * @param MenuHelper
+     * @var Twig_Environment
      */
-    public function __construct(MenuHelper $helper)
+    protected $environment;
+
+    /**
+     * @param MenuPreparator
+     */
+    public function __construct(MenuPreparator $preparator)
     {
-        $this->helper = $helper;
+        $this->preparator = $preparator;
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
+    public function initRuntime(\Twig_Environment $environment)
+    {
+        $this->environment = $environment;
     }
 
     /**
@@ -36,22 +49,33 @@ class MenuExtension extends \Twig_Extension
 
     /**
      * @param string $name
-     * @return \Knplabs\Bundle\MenuBundle\Menu
-     * @throws \InvalidArgumentException
-     */
-    public function get($name)
-    {
-        return $this->helper->get($name);
-    }
-
-    /**
-     * @param string $name
      * @param integer $depth (optional)
      * @return string
      */
     public function render($name, $path = null, $depth = null, $template = null)
     {
-        return $this->helper->render($name, $path, $depth, $template);
+        $item = $this->preparator->get($name);
+        
+        $item->initialize(array('path' => $path));
+
+        /**
+         * Return an empty string if any of the following are true:
+         *   a) The menu has no children eligible to be displayed
+         *   b) The depth is 0
+         *   c) This menu item has been explicitly set to hide its children
+         */
+        if (!$item->hasChildren() || $depth === 0 || !$item->getShowChildren()) {
+            return '';
+        }
+        
+        if (null === $template) {
+            $template = 'KnplabsMenuBundle:Menu:menu.html.twig';
+        }
+
+        return trim($this->environment->render($template, array(
+            'item'  => $item,
+            'menu' => $this->preparator,
+        )));
     }
 
     /**
