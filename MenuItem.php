@@ -775,7 +775,7 @@ class MenuItem implements \ArrayAccess, \Countable, \IteratorAggregate
     public function hasChildren()
     {
         foreach ($this->children as $child) {
-            if ($child->shouldBeRendered()) {
+            if ($child->shouldBeRendered() || $children->hasChildren()) {
                 return true;
             }
         }
@@ -1136,6 +1136,10 @@ class MenuItem implements \ArrayAccess, \Countable, \IteratorAggregate
      */
     public function setCurrentUri($uri)
     {
+        if ($pos = \strpos($uri,'?')) {
+            $uri = \substr($uri, 0, $pos);
+        }
+
         $this->currentUri = $uri;
 
         foreach ($this->getChildren() as $child) {
