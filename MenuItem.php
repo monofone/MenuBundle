@@ -775,7 +775,7 @@ class MenuItem implements \ArrayAccess, \Countable, \IteratorAggregate
     public function hasChildren()
     {
         foreach ($this->children as $child) {
-            if ($child->shouldBeRendered() || $children->hasChildren()) {
+            if ($child->shouldBeRendered() || $child->hasChildren()) {
                 return true;
             }
         }
