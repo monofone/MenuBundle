@@ -392,10 +392,24 @@ class MenuItem implements \ArrayAccess, \Countable, \IteratorAggregate
      */
     public function getChild($name)
     {
-        return isset($this->children[$name]) ? $this->children[$name] : null;
+      $retChild = null;
+      
+      if (isset($this->children[$name])) {
+        $retChild = $this->children[$name];
+      } else {
+        foreach ($this->children as $childName => $child) {
+          if($childName == $name){
+            $retChild = $child;
+          }else{
+            $retChild = $child->getChild($name);
+          }
+        }
+      }
+
+      return $retChild;
     }
 
-    /**
+  /**
      * Moves child to specified position. Rearange other children accordingly.
      *
      * @param numeric $position Position to move child to.
@@ -547,28 +561,15 @@ class MenuItem implements \ArrayAccess, \Countable, \IteratorAggregate
      */
     private function sliceFromTo($from, $to)
     {
-        $newMenu = $this->copy();
+        $newMenu = $this->getChild($from)->copy();
         $newChildren = array();
 
         $copy = false;
         foreach($newMenu->getChildren() as $child) {
-            if ($child->getName() == $from) {
-                $copy = true;
-            }
-
-            if ($copy == true) {
-                $newChildren[$child->getName()] = $child;
-            }
-
-            if ($child->getName() == $to) {
-                break;
-            }
+            $newChildren[$child->getName()] = $child;
         }
 
-        $newMenu->setChildren($newChildren);
-        $newMenu->resetChildrenNum();
-
-        return $newMenu;
+        return $newChildren;
     }
 
     /**
